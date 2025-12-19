@@ -5,7 +5,7 @@ services:
   app:
     build: .
     ports:
-      - "80:80"
+      - "44390:443"
     environment:
       - DB_HOST=db
       - DB_NAME=securepass_db
