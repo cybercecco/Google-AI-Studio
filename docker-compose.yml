@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # The Web Application (React + PHP)
+  app:
+    build: .
+    ports:
+      - "80:80"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=securepass_db
+      # Using a dedicated user instead of root
+      - DB_USER=secure_user
+      # Complex password matching the DB creation below
+      - DB_PASSWORD=Sup3r_C0mpl3x_P@ssw0rd_2024!
+      - API_KEY=${API_KEY} # Optional: Pass Google Gemini API Key if you have one
+    depends_on:
+      - db
+    networks:
+      - securepass-net
+
+  # The Database
+  db:
+    image: mariadb:10.6
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      # Strong Root Password (for admin maintenance only)
+      MYSQL_ROOT_PASSWORD: R00t_M@st3r_S3cr3t_K3y_99!
+      
+      # Database Initialization
+      MYSQL_DATABASE: securepass_db
+      
+      # Dedicated User for the App (Good security practice)
+      MYSQL_USER: secure_user
+      MYSQL_PASSWORD: Sup3r_C0mpl3x_P@ssw0rd_2024!
+    volumes:
+      - db_data:/var/lib/mysql
+      # Initialize DB with schema automatically on first run
+      - ./schema.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - securepass-net
+
+volumes:
+  db_data:
+
+networks:
+  securepass-net:
+    driver: bridge
